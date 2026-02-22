@@ -17,6 +17,12 @@ public final class EnvLoader {
     private EnvLoader() {}
 
     private static void loadEnvFile() {
+        java.io.File envFile = new java.io.File(ENV_FILE_NAME);
+
+        if (!envFile.exists()) {
+            return;
+        }
+
 
         try (BufferedReader reader = new BufferedReader(new FileReader(ENV_FILE_NAME))) {
             String currentLine;

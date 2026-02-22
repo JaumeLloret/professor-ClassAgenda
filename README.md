@@ -84,10 +84,26 @@ Ejemplo:
   - TASK_SHARES
   - EVENT_SHARES
 
+
+### Configuración (.env)
+
+Este proyecto usa un archivo `.env` local para configurar la base de datos.
+
+#### Pasos
+
+1. Copia `.env.example` y renómbralo a `.env`
+2. Rellena la contraseña real en `.env`
+3. **No subas nunca** `.env` a GitHub (está en `.gitignore`)
+
+Variables necesarias:
+- CLASSAGENDA_DB_URL
+- CLASSAGENDA_DB_USER
+- CLASSAGENDA_DB_PASSWORD
+
 📌 **Pendiente**:  
 - Esquema relacional  
 - Diagrama E-R  
-- Scripts SQL  
+- Scripts SQL
 
 ---
 

@@ -1,0 +1,11 @@
+DROP TABLE Example;
+
+USE ClassAgenda;
+GO
+
+CREATE TABLE Example (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    message NVARCHAR(255) NOT NULL,
+    created_at DATETIME2 DEFAULT SYSDATETIME()
+);
+GO

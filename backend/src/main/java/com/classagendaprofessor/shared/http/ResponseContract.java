@@ -1,6 +1,6 @@
 package com.classagendaprofessor.shared.http;
 
-import com.classagendaprofessor.shared.http.helpers.JsonEscaper;
+import com.classagendaprofessor.shared.utilities.JsonEscaper;
 
 import java.time.Instant;
 

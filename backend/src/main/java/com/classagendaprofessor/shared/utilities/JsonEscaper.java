@@ -1,4 +1,4 @@
-package com.classagendaprofessor.shared.http.helpers;
+package com.classagendaprofessor.shared.utilities;
 
 public final class JsonEscaper {
     private JsonEscaper() {}

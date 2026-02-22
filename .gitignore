@@ -65,8 +65,7 @@ temp/
 # Base de datos / Configuración sensible
 # ---------
 # Ficheros de configuración locales (NO subir credenciales)
-.env
-.env.*
+backend/.env
 config.properties
 application.properties
 

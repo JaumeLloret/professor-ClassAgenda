@@ -1,0 +1,23 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: classagenda-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "ClassAgenda2026!Aa"
+    ports:
+      - "11433:1433"
+    volumes:
+      - D:\dev\docker\classagenda-sql\data:/var/opt/mssql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "(/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\") || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined

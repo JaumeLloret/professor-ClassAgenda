@@ -2,7 +2,7 @@ package com.classagendaprofessor.features.example.presentation.handlers;
 
 import com.classagendaprofessor.shared.http.JsonResponses;
 import com.classagendaprofessor.shared.http.ResponseContract;
-import com.classagendaprofessor.shared.http.helpers.JsonEscaper;
+import com.classagendaprofessor.shared.utilities.JsonEscaper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 

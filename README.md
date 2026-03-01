@@ -1,173 +1,97 @@
-# Grupo 6 - ClassAgenda
+# 🚀 ClassAgenda - Profesor: Jaume Lloret Enríquez
 
-Proyecto Intermodular de **1º DAM**  
-Aplicación web de agenda colaborativa desarrollada sin frameworks.
-
----
-
-## 👥 Equipo
-
-- Alumno/a 1:  
-- Alumno/a 2:  
-- Alumno/a 3:  
+Repositorio oficial del proyecto intermodular **ClassAgenda** para el ciclo de **1º DAM**. Este proyecto sirve como base técnica y guía de referencia para la implementación de una API REST robusta, escalable y siguiendo los estándares más exigentes de la industria.
 
 ---
 
-## 🎯 Descripción del proyecto
+## 🎯 Descripción del Proyecto
+**ClassAgenda** es una solución integral para la gestión académica colaborativa. Permite a los usuarios organizar **tareas** y **eventos**, integrando un sistema de permisos avanzado para compartir elementos entre usuarios con roles de lectura (`READ`) o edición (`EDIT`).
 
-ClassAgenda es una aplicación web que permite a los usuarios gestionar **tareas** y **eventos**, asociarlos a un usuario propietario y **compartirlos con otros usuarios** con distintos permisos (READ / EDIT).
-
-El proyecto integra contenidos de Programación, Bases de Datos, Sistemas Informáticos, Entornos de Desarrollo y Lenguajes de Marcas.
-
----
-
-## ⚙️ Tecnologías utilizadas
-
-### Backend
-- Java puro
-- HttpServer
-- JDBC
-- Arquitectura limpia
-- Principios SOLID
-
-### Base de datos
-- SQL Server
-
-### Cliente
-- HTML5
-- CSS3
-- JavaScript (fetch + JSON)
-
-### Infraestructura
-- Máquina virtual Windows
-- Git y GitHub
+El proyecto demuestra la convergencia de:
+* **Arquitectura Limpia (Clean Architecture)**: Independencia de frameworks y base de datos.
+* **Diseño Relacional**: Gestión de integridad mediante PK/FK en SQL Server.
+* **Integración Continua**: Automatización de calidad mediante GitHub Actions.
 
 ---
 
-## 🚫 Restricciones
+## 🏗️ Arquitectura y Tecnologías
 
-- No se utilizan frameworks
-- No hay sistema de autenticación
-- El usuario activo se indica mediante la cabecera HTTP:
+### Stack Tecnológico
+* **Lenguaje**: Java 21 (LTS).
+* **Servidor**: Java `HttpServer` nativo (sin frameworks como Spring).
+* **Persistencia**: Microsoft SQL Server mediante JDBC puro.
+* **Gestión de Dependencias**: Maven.
+* **Calidad**: JUnit 5 para tests unitarios y de integración (IT).
 
-```
-X-User-Id: <id_del_usuario>
-```
 
----
 
-## 🧱 Arquitectura del proyecto
-
-> Describir aquí la estructura de carpetas y la arquitectura utilizada.
-
-Ejemplo:
-```
-/api
-  /presentation
-  /application
-  /domain
-  /infrastructure
-/client
-/database
-/docs
-```
+### Estructura del Proyecto (Clean Architecture)
+El código se organiza en capas para separar responsabilidades técnicas de las reglas de negocio:
+* **/presentation**: Controladores (Handlers), DTOs y validación de entrada.
+* **/domain**: Modelos de negocio inmutables y contratos de repositorios (Interfaces).
+* **/data**: Implementaciones JDBC, DAOs, Entidades y Mappers.
+* **/shared**: Configuraciones globales, cargador de `.env` y utilidades de red.
 
 ---
 
-## 🗄️ Base de datos
+## 🗄️ Base de Datos
 
-- Motor: SQL Server
-- Tablas principales:
-  - USERS
-  - TASKS
-  - EVENTS
-  - TASK_SHARES
-  - EVENT_SHARES
+El esquema relacional garantiza la consistencia de los datos mediante restricciones estrictas de claves primarias (PK) y foráneas (FK).
 
 
-### Configuración (.env)
 
-Este proyecto usa un archivo `.env` local para configurar la base de datos.
-
-#### Pasos
-
-1. Copia `.env.example` y renómbralo a `.env`
-2. Rellena la contraseña real en `.env`
-3. **No subas nunca** `.env` a GitHub (está en `.gitignore`)
-
-Variables necesarias:
-- CLASSAGENDA_DB_URL
-- CLASSAGENDA_DB_USER
-- CLASSAGENDA_DB_PASSWORD
-
-📌 **Pendiente**:  
-- Esquema relacional  
-- Diagrama E-R  
-- Scripts SQL
+### Entidades y Relaciones
+* **USERS**: Almacena el `id`, `name`, `email` (único) y fecha de creación.
+* **TASKS**: Tareas con `status` (`PENDING`/`DONE`), `priority` (`LOW`/`MED`/`HIGH`) y fecha de vencimiento.
+* **EVENTS**: Gestión de eventos con tipos (`EXAM`, `DELIVERY`, `CLASS`, `OTHER`) y franjas horarias.
+* **SHARES**: Tablas intermedias (`TASK_SHARES`, `EVENT_SHARES`) para gestionar la colaboración N:N con permisos específicos.
 
 ---
 
-## 🌐 API REST
+## 🌐 API REST: Contratos y Reglas
 
-📌 **Pendiente**:  
-- Listado de endpoints
-- Ejemplos de peticiones y respuestas
-- Contratos JSON
+### Identificación de Usuario
+La API no implementa autenticación; el usuario activo se indica en cada petición mediante la cabecera HTTP obligatoria:
+`X-User-Id: <entero>`.
+*Si falta la cabecera o no es válida, el servidor responde con 400 Bad Request.*
 
----
-
-## 🖥️ Cliente web
-
-📌 **Pendiente**:  
-- Descripción de las vistas
-- Flujo de navegación
-- Capturas de pantalla
-
----
-
-## 🖥️ Máquina virtual (Servidor)
-
-📌 **Pendiente**:  
-- Configuración de la VM
-- Instalación de SQL Server
-- Puesta en marcha de la API
-- Evidencias (capturas)
+### Resumen de Endpoints Principales
+| Recurso | Método | Endpoint | Descripción |
+| :--- | :--- | :--- | :--- |
+| **Usuarios** | `POST` | `/users` | Crear un nuevo usuario. |
+| **Tareas** | `GET` | `/tasks` | Listar tareas con filtros de `scope`, `status` y `priority`. |
+| **Tareas** | `DELETE` | `/tasks/{id}` | Borrar tarea (solo permitido al propietario). |
+| **Eventos** | `POST` | `/events/{id}/share` | Compartir un evento con otro usuario. |
+| **Salud** | `GET` | `/health` | Comprobar el estado del servidor (sin cabecera). |
 
 ---
 
-## 🧪 Pruebas
+## ⚙️ Configuración del Entorno
 
-📌 **Pendiente**:  
-- Casos de prueba manuales
-- Evidencias de funcionamiento
+### Requisitos Técnicos
+1.  **Java 21** o superior.
+2.  **Maven** (gestión de dependencias y ciclo de vida).
+3.  **SQL Server** configurado con los scripts `01_schema.sql` y `02_seed.sql`.
 
----
-
-## 📈 Metodología de trabajo
-
-El proyecto se desarrolla siguiendo **Extreme Programming (XP)**:
-
-- Trabajo en iteraciones
-- Pair programming
-- Commits pequeños y frecuentes
-- Uso de Issues, Projects y Pull Requests en GitHub
-- Refactorización continua
+### Variables de Entorno (.env)
+Es necesario un archivo `.env` local para configurar la base de datos (excluido de Git):
+* `CLASSAGENDA_DB_URL`: URL de conexión JDBC.
+* `CLASSAGENDA_DB_USER`: Usuario de la base de datos.
+* `CLASSAGENDA_DB_PASSWORD`: Contraseña de acceso.
 
 ---
 
-## 🚀 Estado del proyecto
-
-- [ ] Diseño inicial
-- [ ] Base de datos
-- [ ] API REST
-- [ ] Cliente web
-- [ ] Integración
-- [ ] Despliegue en VM
-- [ ] Documentación final
+## 🧪 Estrategia de Pruebas
+* **Sanity Tests**: Validación inicial de que JUnit y Maven funcionan correctamente.
+* **Unit Tests**: Pruebas de lógica de dominio y validaciones de modelos (ej. el nombre de usuario es obligatorio).
+* **Integration Tests (IT)**: Pruebas de flujo completo que levantan el servidor y conectan a la DB real.
 
 ---
 
-## 📌 Notas finales
+## 📈 Metodología y Calidad
+* **SOLID**: Enfoque en Responsabilidad Única e Inversión de Dependencias.
+* **Clean Code**: Código autodocumentado, métodos pequeños y manejo de errores con códigos estándar (`VALIDATION_ERROR`, `NOT_FOUND`, etc.).
+* **Fail Fast**: Validación rigurosa de entradas para detectar errores en etapas tempranas.
 
-Este README debe actualizarse durante todo el desarrollo del proyecto.  
-La calidad de la documentación forma parte de la evaluación.
+---
+*Repositorio mantenido por el docente **Jaume Lloret Enríquez**. Documentación sujeta a actualizaciones según el progreso del ciclo.*

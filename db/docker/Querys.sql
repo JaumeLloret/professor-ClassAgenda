@@ -9,3 +9,14 @@ CREATE TABLE Example (
     created_at DATETIME2 DEFAULT SYSDATETIME()
 );
 GO
+
+USE ClassAgenda;
+GO
+
+CREATE TABLE USERS (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at DATETIME NOT NULL
+);
+GO

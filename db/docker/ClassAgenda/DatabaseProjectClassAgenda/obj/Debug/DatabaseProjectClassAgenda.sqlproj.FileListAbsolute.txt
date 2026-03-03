@@ -1,0 +1,5 @@
+d:\OneDrive\Proyectos\IdeaProjects\professor-ClassAgenda\db\docker\ClassAgenda\DatabaseProjectClassAgenda\bin\Debug\DatabaseProjectClassAgenda.dacpac
+d:\OneDrive\Proyectos\IdeaProjects\professor-ClassAgenda\db\docker\ClassAgenda\DatabaseProjectClassAgenda\obj\Debug\Model.xml
+d:\OneDrive\Proyectos\IdeaProjects\professor-ClassAgenda\db\docker\ClassAgenda\DatabaseProjectClassAgenda\obj\Debug\refactor.xml
+d:\OneDrive\Proyectos\IdeaProjects\professor-ClassAgenda\db\docker\ClassAgenda\DatabaseProjectClassAgenda\obj\Debug\postdeploy.sql
+d:\OneDrive\Proyectos\IdeaProjects\professor-ClassAgenda\db\docker\ClassAgenda\DatabaseProjectClassAgenda\obj\Debug\predeploy.sql

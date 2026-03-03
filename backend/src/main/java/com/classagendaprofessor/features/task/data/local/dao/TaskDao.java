@@ -1,6 +1,5 @@
 package com.classagendaprofessor.features.task.data.local.dao;
 
-import com.classagendaprofessor.features.task.data.local.connection.DbConnectionFactory;
 import com.classagendaprofessor.features.task.data.local.entity.TaskEntity;
 
 import java.sql.*;
@@ -10,30 +9,28 @@ import java.util.List;
 import java.util.Optional;
 
 public class TaskDao {
-    private final DbConnectionFactory connectionFactory;
+    private final Connection connection;
 
-    public TaskDao(DbConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
+    public TaskDao(Connection connection) {
+        this.connection = connection;
     }
 
     public TaskEntity insert(TaskEntity entity) {
         String query = "INSERT INTO TASKS (title, description, status, priority, owner_id, created_at) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (
-                Connection connection = connectionFactory.getConnection();
-                PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+        try (PreparedStatement createTaskStmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            pstmt.setString(1, entity.getTitle());
-            pstmt.setString(2, entity.getDescription());
-            pstmt.setString(3, entity.getStatus());
-            pstmt.setString(4, entity.getPriority());
-            pstmt.setLong(5, entity.getOwnerId());
-            pstmt.setObject(6, entity.getCreatedAt());
+            createTaskStmt.setString(1, entity.getTitle());
+            createTaskStmt.setString(2, entity.getDescription());
+            createTaskStmt.setString(3, entity.getStatus());
+            createTaskStmt.setString(4, entity.getPriority());
+            createTaskStmt.setLong(5, entity.getOwnerId());
+            createTaskStmt.setObject(6, entity.getCreatedAt());
 
-            pstmt.executeUpdate();
+            createTaskStmt.executeUpdate();
 
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+            try (ResultSet generatedKeys = createTaskStmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     entity.setId(generatedKeys.getLong(1));
                     return entity;
@@ -49,16 +46,15 @@ public class TaskDao {
     public void update(TaskEntity entity) {
         String query = "UPDATE TASKS SET title = ?, description = ?, status = ?, priority = ? WHERE id = ?";
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (PreparedStatement updateTaskStmt = connection.prepareStatement(query)) {
 
-            pstmt.setString(1, entity.getTitle());
-            pstmt.setString(2, entity.getDescription());
-            pstmt.setString(3, entity.getStatus());
-            pstmt.setString(4, entity.getPriority());
-            pstmt.setLong(5, entity.getId());
+            updateTaskStmt.setString(1, entity.getTitle());
+            updateTaskStmt.setString(2, entity.getDescription());
+            updateTaskStmt.setString(3, entity.getStatus());
+            updateTaskStmt.setString(4, entity.getPriority());
+            updateTaskStmt.setLong(5, entity.getId());
 
-            int affectedRows = pstmt.executeUpdate();
+            int affectedRows = updateTaskStmt.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Update fallido: La tarea con ese ID no existe.");
             }
@@ -70,14 +66,11 @@ public class TaskDao {
     public Optional<TaskEntity> findById(Long id) {
         String query = "SELECT id, title, description, status, priority, owner_id, created_at FROM TASKS WHERE id = ?";
 
-        try (
-            Connection connection = connectionFactory.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query)
-        ) {
+        try (PreparedStatement findTaskByIdStmt = connection.prepareStatement(query)) {
 
-            pstmt.setLong(1, id);
+            findTaskByIdStmt.setLong(1, id);
 
-            try (ResultSet resultSet = pstmt.executeQuery()) {
+            try (ResultSet resultSet = findTaskByIdStmt.executeQuery()) {
                 if (resultSet.next()) {
                     return Optional.of(mapResultSetToEntity(resultSet));
                 }
@@ -92,12 +85,11 @@ public class TaskDao {
         String query = "SELECT id, title, description, status, priority, owner_id, created_at FROM TASKS WHERE owner_id = ?";
         List<TaskEntity> list = new ArrayList<>();
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (PreparedStatement findTaskByOwnerStmt = connection.prepareStatement(query)) {
 
-            pstmt.setLong(1, ownerId);
+            findTaskByOwnerStmt.setLong(1, ownerId);
 
-            try (ResultSet resultSet = pstmt.executeQuery()) {
+            try (ResultSet resultSet = findTaskByOwnerStmt.executeQuery()) {
                 while (resultSet.next()) {
                     list.add(mapResultSetToEntity(resultSet));
                 }
@@ -113,13 +105,12 @@ public class TaskDao {
                 "FROM TASKS WHERE owner_id = ? AND status = ?";
         List<TaskEntity> list = new ArrayList<>();
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (PreparedStatement findTaskByOwnerAndStatusStmt = connection.prepareStatement(query)) {
 
-            pstmt.setLong(1, ownerId);
-            pstmt.setString(2, status);
+            findTaskByOwnerAndStatusStmt.setLong(1, ownerId);
+            findTaskByOwnerAndStatusStmt.setString(2, status);
 
-            try (ResultSet resultSet = pstmt.executeQuery()) {
+            try (ResultSet resultSet = findTaskByOwnerAndStatusStmt.executeQuery()) {
                 while (resultSet.next()) {
                     list.add(mapResultSetToEntity(resultSet));
                 }
@@ -145,11 +136,10 @@ public class TaskDao {
     public void deleteById(Long id) {
         String query = "DELETE FROM TASKS WHERE id = ?";
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (PreparedStatement deleteTaskStmt = connection.prepareStatement(query)) {
 
-            pstmt.setLong(1, id);
-            pstmt.executeUpdate();
+            deleteTaskStmt.setLong(1, id);
+            deleteTaskStmt.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException("Error en BD al borrar la tarea", e);

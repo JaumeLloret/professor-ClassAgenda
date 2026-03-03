@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TaskRepository {
-    Task save(Task newTask);
+    Task save(Task task);
     Optional<Task> findById(Long id);
     List<Task> findByOwnerId(long id);
     List<Task> findByOwnerIdAndStatus(long ownerId, TaskStatus status);

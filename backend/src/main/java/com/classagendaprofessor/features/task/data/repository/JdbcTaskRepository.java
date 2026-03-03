@@ -6,7 +6,6 @@ import com.classagendaprofessor.features.task.data.mapper.TaskMapper;
 import com.classagendaprofessor.features.task.domain.model.Task;
 import com.classagendaprofessor.features.task.domain.model.TaskStatus;
 import com.classagendaprofessor.features.task.domain.repository.TaskRepository;
-import com.classagendaprofessor.features.user.data.local.entity.UserEntity;
 
 import java.util.List;
 import java.util.Optional;

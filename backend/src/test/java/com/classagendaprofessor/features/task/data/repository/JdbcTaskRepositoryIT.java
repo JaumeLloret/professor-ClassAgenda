@@ -5,51 +5,50 @@ import com.classagendaprofessor.features.task.domain.model.Task;
 import com.classagendaprofessor.features.task.domain.model.TaskPriority;
 import com.classagendaprofessor.features.task.domain.model.TaskStatus;
 import com.classagendaprofessor.features.user.data.local.dao.UserDao;
-import com.classagendaprofessor.features.user.data.local.entity.UserEntity;
 import com.classagendaprofessor.features.user.data.repository.JdbcUserRepository;
 import com.classagendaprofessor.features.user.domain.model.User;
 import com.classagendaprofessor.shared.config.DbConfig;
+import com.classagendaprofessor.shared.database.DbConnectionFactory;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.sql.Connection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JdbcTaskRepositoryIT {
-    private JdbcTaskRepository taskRepository;
-    private JdbcUserRepository userRepository;
+    @Test
+    void fullTaskCrudLifecycle() throws Exception {
 
-    @BeforeEach
-    void setUp() {
-        try {
-            DbConfig.url();
-        } catch (Exception e) {
-            Assumptions.abort("Saltando test de integración: No hay BD configurada en el entorno.");
+        try { DbConfig.url(); } catch (Exception e) {
+            Assumptions.abort("Saltando test: No hay BD configurada.");
         }
 
-        userRepository = new JdbcUserRepository(new UserDao(new com.classagendaprofessor.features.user.data.local.connection.DbConnectionFactory()));
-        taskRepository = new JdbcTaskRepository(new TaskDao(new com.classagendaprofessor.features.task.data.local.connection.DbConnectionFactory()));
-    }
+        DbConnectionFactory factory = new DbConnectionFactory();
 
-    @Test
-    void savesTaskAndFiltersByOwnerAndStatus() {
-        String tempEmail = "owner_" + System.currentTimeMillis() + "@test.com";
-        User tempOwner = new User(null, "Task Owner", tempEmail, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-        User savedOwner = userRepository.save(tempOwner);
-        Long ownerId = savedOwner.getId();
+        try (Connection connection = factory.getConnection()) {
 
-        Task task1 = new Task("Aprender Java", "...", TaskPriority.HIGH, ownerId);
-        Task savedTask1 = taskRepository.save(task1);
+            UserDao userDao = new UserDao(connection);
+            TaskDao taskDao = new TaskDao(connection);
 
-        List<Task> pendingTasks = taskRepository.findByOwnerIdAndStatus(ownerId, TaskStatus.PENDING);
+            JdbcUserRepository userRepository = new JdbcUserRepository(userDao);
+            JdbcTaskRepository taskRepository = new JdbcTaskRepository(taskDao);
 
-        assertFalse(pendingTasks.isEmpty(), "Debería encontrar al menos 1 tarea pendiente");
-        assertEquals(savedTask1.getId(), pendingTasks.getFirst().getId());
-        assertEquals(ownerId, pendingTasks.getFirst().getOwnerId());
+            String uniqueEmail = "owner_" + System.currentTimeMillis() + "@test.com";
+            User owner = new User("Dueño", uniqueEmail);
+            User savedOwner = userRepository.save(owner);
+
+            Task newTask = new Task("Comprar pan", "Ir al súper", TaskPriority.HIGH, savedOwner.getId());
+            Task savedTask = taskRepository.save(newTask);
+
+            assertNotNull(savedTask.getId());
+            assertEquals(TaskStatus.PENDING, savedTask.getStatus());
+
+            List<Task> pendingTasks = taskRepository.findByOwnerIdAndStatus(savedOwner.getId(), TaskStatus.PENDING);
+            assertEquals(1, pendingTasks.size());
+
+            taskRepository.delete(savedTask.getId());
+        }
     }
 }

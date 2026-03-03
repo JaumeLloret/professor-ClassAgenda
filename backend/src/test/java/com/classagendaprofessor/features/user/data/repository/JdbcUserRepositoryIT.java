@@ -1,13 +1,14 @@
 package com.classagendaprofessor.features.user.data.repository;
 
-import com.classagendaprofessor.features.user.data.local.connection.DbConnectionFactory;
 import com.classagendaprofessor.features.user.data.local.dao.UserDao;
 import com.classagendaprofessor.features.user.domain.model.User;
 import com.classagendaprofessor.shared.config.DbConfig;
+import com.classagendaprofessor.shared.database.DbConnectionFactory;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -25,7 +26,12 @@ public class JdbcUserRepositoryIT {
         }
 
         DbConnectionFactory connectionFactory = new DbConnectionFactory();
-        UserDao userDao = new UserDao(connectionFactory);
+        UserDao userDao = null;
+        try {
+            userDao = new UserDao(connectionFactory.getConnection());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         userRepository = new JdbcUserRepository(userDao);
     }
 

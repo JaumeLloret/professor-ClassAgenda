@@ -1,6 +1,5 @@
 package com.classagendaprofessor.features.user.data.local.dao;
 
-import com.classagendaprofessor.features.user.data.local.connection.DbConnectionFactory;
 import com.classagendaprofessor.features.user.data.local.entity.UserEntity;
 
 import java.sql.*;
@@ -10,28 +9,26 @@ import java.util.List;
 import java.util.Optional;
 
 public final class UserDao {
-    private final DbConnectionFactory connectionFactory;
-    public UserDao(DbConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
+    private final Connection connection;
+    public UserDao(Connection connection) {
+        this.connection = connection;
     }
 
     public UserEntity insert(UserEntity userEntity) {
         String query = "INSERT INTO users (name, email, created_at) VALUES (?, ?, ?)";
 
-        try (
-                Connection connection = connectionFactory.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-        ) {
-            preparedStatement.setString(1, userEntity.getName());
-            preparedStatement.setString(2, userEntity.getEmail());
-            preparedStatement.setObject(3, userEntity.getCreatedAt());
+        try (PreparedStatement createUserStmt = connection
+                .prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            createUserStmt.setString(1, userEntity.getName());
+            createUserStmt.setString(2, userEntity.getEmail());
+            createUserStmt.setObject(3, userEntity.getCreatedAt());
 
-            int affectedRows = preparedStatement.executeUpdate();
+            int affectedRows = createUserStmt.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("No se pudo insertar el usuario");
             }
 
-            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+            try (ResultSet generatedKeys = createUserStmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     userEntity.setId(generatedKeys.getLong(1));
                     return userEntity;
@@ -46,16 +43,15 @@ public final class UserDao {
     }
 
     public void update(UserEntity entityToUpdate) {
-        String updateQuery = "UPDATE USERS SET name = ?, email = ? WHERE id = ?";
+        String query = "UPDATE USERS SET name = ?, email = ? WHERE id = ?";
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+        try (PreparedStatement updateUserStmt = connection.prepareStatement(query)) {
 
-            preparedStatement.setString(1, entityToUpdate.getName());
-            preparedStatement.setString(2, entityToUpdate.getEmail());
-            preparedStatement.setLong(3, entityToUpdate.getId());
+            updateUserStmt.setString(1, entityToUpdate.getName());
+            updateUserStmt.setString(2, entityToUpdate.getEmail());
+            updateUserStmt.setLong(3, entityToUpdate.getId());
 
-            int affectedRows = preparedStatement.executeUpdate();
+            int affectedRows = updateUserStmt.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("No se pudo actualizar el usuario, el ID no existe.");
             }
@@ -65,14 +61,13 @@ public final class UserDao {
     }
 
     public Optional<UserEntity> findById(Long idToSearch) {
-        String selectQuery = "SELECT id, name, email, created_at FROM USERS WHERE id = ?";
+        String query = "SELECT id, name, email, created_at FROM USERS WHERE id = ?";
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+        try (PreparedStatement readByIdUserStmt = connection.prepareStatement(query)) {
 
-            preparedStatement.setLong(1, idToSearch);
+            readByIdUserStmt.setLong(1, idToSearch);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            try (ResultSet resultSet = readByIdUserStmt.executeQuery()) {
                 if (resultSet.next()) {
                     return Optional.of(mapResultSetToEntity(resultSet));
                 }
@@ -86,12 +81,11 @@ public final class UserDao {
     public Optional<UserEntity> findByEmail(String email) {
         String query = "SELECT id, name, email, created_at FROM USERS WHERE email = ?";
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+        try (PreparedStatement readByEmailUserStmt = connection.prepareStatement(query)) {
 
-            preparedStatement.setString(1, email);
+            readByEmailUserStmt.setString(1, email);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            try (ResultSet resultSet = readByEmailUserStmt.executeQuery()) {
                 if (resultSet.next()) {
                     return Optional.of(mapResultSetToEntity(resultSet));
                 }
@@ -103,12 +97,11 @@ public final class UserDao {
     }
 
     public List<UserEntity> findAll() {
-        String selectAllQuery = "SELECT id, name, email, created_at FROM USERS";
+        String query = "SELECT id, name, email, created_at FROM USERS";
         List<UserEntity> usersList = new ArrayList<>();
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(selectAllQuery);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
+        try (PreparedStatement readAllUserStmt = connection.prepareStatement(query);
+             ResultSet resultSet = readAllUserStmt.executeQuery()) {
 
             while (resultSet.next()) {
                 usersList.add(mapResultSetToEntity(resultSet));
@@ -130,13 +123,12 @@ public final class UserDao {
     }
 
     public void deleteById(Long idToDelete) {
-        String deleteQuery = "DELETE FROM USERS WHERE id = ?";
+        String query = "DELETE FROM USERS WHERE id = ?";
 
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+        try (PreparedStatement deleteUserStmt = connection.prepareStatement(query)) {
 
-            preparedStatement.setLong(1, idToDelete);
-            preparedStatement.executeUpdate();
+            deleteUserStmt.setLong(1, idToDelete);
+            deleteUserStmt.executeUpdate();
 
         } catch (SQLException exception) {
             throw new RuntimeException("Error en BD al borrar usuario por ID", exception);

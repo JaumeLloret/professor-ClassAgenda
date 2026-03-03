@@ -4,7 +4,7 @@ import com.classagendaprofessor.features.user.data.local.entity.UserEntity;
 import com.classagendaprofessor.features.user.domain.model.User;
 
 public final class UserMapper {
-    private  UserMapper() {}
+    private UserMapper() {}
     public static UserEntity toEntity(User user) {
         if (user == null)
             return null;
